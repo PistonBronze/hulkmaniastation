@@ -304,10 +304,10 @@
 	return style_factor_points
 
 /// Verb added to humans who learn the art of the sleeping carp.
-/mob/living/proc/sleeping_carp_help()
+/mob/living/proc/thalmann_style_help()
 	set name = "Recall Teachings"
-	set desc = "Remember the martial techniques of the Sleeping Carp clan."
-	set category = "Sleeping Carp"
+	set desc = "Remember the martial techniques of the German working class, twisted to fit a brutal crusade against life itself."
+	set category = "Thalmann Style Boxing"
 
 	to_chat(usr, span_info("<b><i>You retreat inward and recall the teachings of the Sleeping Carp...</i></b>\n\
 	[span_notice("Gnashing Teeth")]: Punch Grab. Violently twists your opponent's arm, dislocating or even shattering bone and forcing them to drop their held items.\n\
