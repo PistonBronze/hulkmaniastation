@@ -14,12 +14,12 @@
 	. = ..()
 	new_holder.add_traits(thal_traits, THALMANN_STYLE_TRAIT)
 	RegisterSignal(new_holder, COMSIG_ATOM_ATTACKBY, PROC_REF(on_attackby))
-	RegisterSignal(new_holder, COMSIG_ATOM_PRE_BULLET_ACT, PROC_REF(hit_by_projectile))
-	RegisterSignal(new_holder, COMSIG_LIVING_CHECK_BLOCK, PROC_REF(check_dodge))
 
 /datum/martial_art/thalmann_style/deactivate_style(mob/living/remove_from)
+	. =  ..()
 	remove_from.remove_traits(thal_traits, THALMANN_STYLE_TRAIT)
 	UnregisterSignal(remove_from, list(COMSIG_ATOM_ATTACKBY, COMSIG_ATOM_PRE_BULLET_ACT, COMSIG_LIVING_CHECK_BLOCK))
+	return .
 
 /datum/martial_art/thalmann_style/proc/check_streak(mob/living/attacker, mob/living/defender)
 	if(findtext(streak,JAB_COMBO_COMBO))
@@ -34,12 +34,11 @@
 
 /// Jab Combo: Harm Harm Harm, every third attack deals more damage and has a small chance to dismember.
 /datum/martial_art/thalmann_style/proc/jab_combo(mob/attacker, mob/living/defender)
+	var/obj/item/bodypart/affecting = defender.get_bodypart(deprecise_zone(attacker.zone_selected))
+	var/dismembering = TRUE
 	// Determine if our defender is a carbon. If not, we won't be able to dismember them
 	if(!iscarbon(defender))
-		var/dismembering = FALSE
-
-	var/obj/item/bodypart/affecting = defender.get_bodypart(deprecise_zone(attacker.zone_selected))
-
+		dismembering = FALSE
 	attacker.do_attack_animation(defender, ATTACK_EFFECT_PUNCH)
 	defender.visible_message(
 		span_danger("[attacker] boxes [defender]!"),
@@ -54,12 +53,15 @@
 	defender.apply_damage(20, BRUTE, affecting, wound_bonus = 30)
 
 	if (affecting != CHEST && dismembering)
-		if (rand(1, 20) == 1)
+		if (rand(1, 1) == 1)
 			affecting.dismember(BRUTE, FALSE, WOUND_BLUNT)
 			var/turf/throw_at = get_ranged_target_turf_direct(defender, attacker, 4, 180) // Throw 180 degrees away from the explosion source
-			affecting.throw_at(throw_at, 4, 2)
+			affecting.throw_at(throw_at, 4, 1)
 
 	return TRUE
+
+
+
 
 /// Tiger Suplex: Grab Disarm, launch an enemy behind you, stunning you for a bit and the opponent for a bit longer
 /datum/martial_art/thalmann_style/proc/tiger_suplex(mob/living/attacker, mob/living/defender)
