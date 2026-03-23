@@ -38,7 +38,7 @@
 	if(!iscarbon(defender))
 		var/dismembering = FALSE
 
-	var/obj/item/bodypart/affecting = defender.body_zone2body_part(attacker.zone_selected)
+	var/obj/item/bodypart/affecting = defender.deprecise_zone(attacker.zone_selected)
 
 	attacker.do_attack_animation(defender, ATTACK_EFFECT_PUNCH)
 	defender.visible_message(

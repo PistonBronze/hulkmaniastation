@@ -378,26 +378,6 @@ GLOBAL_LIST_INIT(modulo_angle_to_dir, list(NORTH,NORTHEAST,EAST,SOUTHEAST,SOUTH,
 		else //regex everything else (works for /proc too)
 			return LOWER_TEXT(replacetext("[the_type]", "[type2parent(the_type)]/", ""))
 
-/proc/body_zone2body_part(slot)
-	switch(slot)
-		if(BODY_ZONE_CHEST, BODY_ZONE_PRECISE_GROIN)
-			return CHEST
-
-		if(BODY_ZONE_L_ARM, BODY_ZONE_PRECISE_L_HAND)
-			return L_ARM
-
-		if(BODY_ZONE_R_ARM, BODY_ZONE_PRECISE_R_HAND)
-			return R_ARM
-
-		if(BODY_ZONE_L_LEG, BODY_ZONE_PRECISE_L_FOOT)
-			return L_LEG
-
-		if(BODY_ZONE_R_LEG, BODY_ZONE_PRECISE_R_FOOT)
-			return R_LEG
-
-		if(BODY_ZONE_HEAD, BODY_ZONE_PRECISE_EYES, BODY_ZONE_PRECISE_MOUTH)
-			return HEAD
-
 /// Return html to load a url.
 /// for use inside of browse() calls to html assets that might be loaded on a cdn.
 /proc/url2htmlloader(url)
