@@ -9,7 +9,7 @@
 #define MARTIALART_PLASMAFIST "plasma fist"
 #define MARTIALART_PSYCHOBRAWL "psychotic brawling"
 #define MARTIALART_SLEEPINGCARP "sleeping carp"
-#define MARTIALART_THALMANN "thallman style"
+#define MARTIALART_THALMANN "thalmann style"
 #define MARTIALART_WRESTLING "wrestling"
 #define MARTIALART_JUNGLEARTS "jungle arts"
 #define MARTIALART_SPIDERSBITE "spider's bite"

@@ -8,17 +8,17 @@
 	display_combos = TRUE
 	grab_state_modifier = 1
 	/// List of traits applied to users of this martial art.
-	var/list/scarp_traits = list(TRAIT_TOSS_GUN_HARD, TRAIT_HARDLY_WOUNDED, TRAIT_SLEEPIMMUNE, TRAIT_PERFECT_ATTACKER)
+	var/list/thal_traits = list(TRAIT_TOSS_GUN_HARD, TRAIT_HARDLY_WOUNDED, TRAIT_SLEEPIMMUNE, TRAIT_PERFECT_ATTACKER)
 
 /datum/martial_art/thalmann_style/activate_style(mob/living/new_holder)
 	. = ..()
-	new_holder.add_traits(scarp_traits, THALMANN_STYLE_TRAIT)
+	new_holder.add_traits(thal_traits, THALMANN_STYLE_TRAIT)
 	RegisterSignal(new_holder, COMSIG_ATOM_ATTACKBY, PROC_REF(on_attackby))
 	RegisterSignal(new_holder, COMSIG_ATOM_PRE_BULLET_ACT, PROC_REF(hit_by_projectile))
 	RegisterSignal(new_holder, COMSIG_LIVING_CHECK_BLOCK, PROC_REF(check_dodge))
 
 /datum/martial_art/thalmann_style/deactivate_style(mob/living/remove_from)
-	remove_from.remove_traits(scarp_traits, THALMANN_STYLE_TRAIT)
+	remove_from.remove_traits(thal_traits, THALMANN_STYLE_TRAIT)
 	UnregisterSignal(remove_from, list(COMSIG_ATOM_ATTACKBY, COMSIG_ATOM_PRE_BULLET_ACT, COMSIG_LIVING_CHECK_BLOCK))
 
 /datum/martial_art/thalmann_style/proc/check_streak(mob/living/attacker, mob/living/defender)
@@ -34,7 +34,6 @@
 
 /// Jab Combo: Harm Harm Harm, every third attack deals more damage and has a small chance to dismember.
 /datum/martial_art/thalmann_style/proc/jab_combo(mob/attacker, mob/living/defender)
-	var/dismembering =
 	// Determine if our defender is a carbon. If not, we won't be able to dismember them
 	if(!iscarbon(defender))
 		var/dismembering = FALSE
@@ -63,7 +62,7 @@
 	return TRUE
 
 /// Tiger Suplex: Grab Disarm, launch an enemy behind you, stunning you for a bit and the opponent for a bit longer
-/datum/martial_art/thalmann_style/proc/tiger_suplex_kick(mob/living/attacker, mob/living/defender)
+/datum/martial_art/thalmann_style/proc/tiger_suplex(mob/living/attacker, mob/living/defender)
 	attacker.do_attack_animation(defender, ATTACK_EFFECT_KICK)
 	defender.visible_message(
 		span_warning("[attacker] suplexes [defender] overhead!"),
@@ -79,7 +78,7 @@
 	log_combat(attacker, defender, "launchkicked (Sleeping Carp)")
 	return TRUE
 
-/datum/martial_art/the_sleeping_carp/grab_act(mob/living/attacker, mob/living/defender)
+/datum/martial_art/thalmann_style/grab_act(mob/living/attacker, mob/living/defender)
 	if(!can_deflect(attacker)) //allows for deniability
 		return MARTIAL_ATTACK_INVALID
 
@@ -104,7 +103,7 @@
 	log_combat(attacker, defender, "[grab_log_description] (Sleeping Carp)")
 	return MARTIAL_ATTACK_INVALID // normal grab
 
-/datum/martial_art/the_sleeping_carp/harm_act(mob/living/attacker, mob/living/defender)
+/datum/martial_art/thalmann_style/harm_act(mob/living/attacker, mob/living/defender)
 	if(attacker.grab_state == GRAB_KILL \
 		&& attacker.zone_selected == BODY_ZONE_HEAD \
 		&& attacker.pulling == defender \
@@ -136,7 +135,7 @@
 
 	return MARTIAL_ATTACK_INVALID // normal punch
 
-/datum/martial_art/the_sleeping_carp/disarm_act(mob/living/attacker, mob/living/defender)
+/datum/martial_art/thalmann_style/disarm_act(mob/living/attacker, mob/living/defender)
 	if(!can_deflect(attacker)) //allows for deniability
 		return MARTIAL_ATTACK_INVALID
 	if(defender.check_block(attacker, 0, attacker.name, UNARMED_ATTACK))
@@ -152,7 +151,7 @@
 	log_combat(attacker, defender, "disarmed (Sleeping Carp)")
 	return MARTIAL_ATTACK_INVALID // normal disarm
 
-/datum/martial_art/the_sleeping_carp/proc/can_deflect(mob/living/carp_user)
+/datum/martial_art/thalmann_style/proc/can_deflect(mob/living/carp_user)
 	if(!can_use(carp_user) || !carp_user.combat_mode)
 		return FALSE
 	if(INCAPACITATED_IGNORING(carp_user, INCAPABLE_GRAB)) //NO STUN
@@ -165,7 +164,7 @@
 		return FALSE
 	return TRUE
 
-/datum/martial_art/the_sleeping_carp/proc/hit_by_projectile(mob/living/carp_user, obj/projectile/hitting_projectile, def_zone)
+/datum/martial_art/thalmann_style/proc/hit_by_projectile(mob/living/carp_user, obj/projectile/hitting_projectile, def_zone)
 	SIGNAL_HANDLER
 
 	var/determine_avoidance = 100
@@ -197,7 +196,7 @@
 	return COMPONENT_BULLET_PIERCED
 
 /// Signal from getting attacked with an item, for a special interaction with touch spells
-/datum/martial_art/the_sleeping_carp/proc/on_attackby(mob/living/carp_user, obj/item/attack_weapon, mob/attacker, list/modifiers)
+/datum/martial_art/thalmann_style/proc/on_attackby(mob/living/carp_user, obj/item/attack_weapon, mob/attacker, list/modifiers)
 	SIGNAL_HANDLER
 
 	if(!istype(attack_weapon, /obj/item/melee/touch_attack))
@@ -212,7 +211,7 @@
 	return COMPONENT_NO_AFTERATTACK
 
 /// If our user has committed to being as martial arty as they can be, they may be able to avoid incoming attacks.
-/datum/martial_art/the_sleeping_carp/proc/check_dodge(mob/living/carp_user, atom/movable/hitby, damage, attack_text, attack_type, ...)
+/datum/martial_art/thalmann_style/proc/check_dodge(mob/living/carp_user, atom/movable/hitby, damage, attack_text, attack_type, ...)
 	SIGNAL_HANDLER
 
 	var/determine_avoidance = clamp(round(carp_style_check(carp_user) / (attack_type == OVERWHELMING_ATTACK ? 2 : 1), 1), 0, 75)
@@ -233,83 +232,13 @@
 	playsound(carp_user.loc, 'sound/items/weapons/punchmiss.ogg', 25, TRUE, -1)
 	return SUCCESSFUL_BLOCK
 
-/* Determines how 'carp-y' or how 'martial arts-y' we are, granting us the ability to avoid attacks.
-* At a baseline, we will always avoid projectile attacks, but we may not necessarily avoid other attacks.
-* If we wear carp based clothing, or martial arts based clothing, we improve our style factor.
-* If we are a carp mutant, we improve our style factor.
-* If we literally are a carp, we just assume we're very carpy and return our max value.
-* If we wear a lot of armor, we reduce our style factor. Some martial arts or carp items may result in a net netural bonus.
-* If there is anything in our hands, we're also less likely to avoid attacks.
-*/
-/datum/martial_art/the_sleeping_carp/proc/carp_style_check(mob/living/carp_user)
-	// An evaluation of how 'carp' we are.
-	var/style_factor_points = 0
-
-	if(istype(carp_user, /mob/living/basic/space_dragon) || istype(carp_user, /mob/living/basic/carp))
-		return 100
-
-	if(!ishuman(carp_user)) // We're not concerned about nonhumans here, we can assume we've covered any relevant mobs by checking for carp.
-		return 0
-
-	var/mob/living/carbon/human/human_carp_user = carp_user
-
-	var/obj/item/bodypart/potential_head = human_carp_user.get_bodypart(BODY_ZONE_HEAD)
-	var/obj/item/bodypart/potential_chest = human_carp_user.get_bodypart(BODY_ZONE_CHEST)
-	var/obj/item/clothing/is_it_the_shoes = human_carp_user.get_item_by_slot(ITEM_SLOT_FEET)
-
-	// The presence of armor and heavy objects is a style malus
-	var/style_factor_malus = 0
-
-	// Lets look to see if any relevant headwear is armored or on theme
-	if(potential_head)
-		for(var/obj/item/clothing/possible_headbands in human_carp_user.get_clothing_on_part(potential_head))
-			if(possible_headbands.clothing_flags & CARP_STYLE_FACTOR)
-				style_factor_points += 20 // Basically, you only need one chest level item to contribute
-		style_factor_malus += human_carp_user.run_armor_check(potential_head, MELEE)
-
-	// Then let's look for any chest clothing that is either armored or on theme
-	if(potential_chest)
-		for(var/obj/item/clothing/possible_gi in human_carp_user.get_clothing_on_part(potential_chest))
-			if(possible_gi.clothing_flags & CARP_STYLE_FACTOR)
-				style_factor_points += 20 // Only need one head level item to contribute
-		style_factor_malus += human_carp_user.run_armor_check(potential_chest, MELEE)
-
-	// We also consider whether our footwear is appropriate
-	if(istype(is_it_the_shoes) && is_it_the_shoes.clothing_flags & CARP_STYLE_FACTOR)
-		style_factor_points += 20
-
-	// Achieved a carp state of mind.
-	if(human_carp_user.has_status_effect(/datum/status_effect/organ_set_bonus/carp))
-		style_factor_points += 20
-
-	// We check for wielded objects. If they're not abstract items or exempt items, we add their weight as a penalty. And their block chance.
-	for(var/obj/item/possibly_a_held_object in human_carp_user.held_items)
-		if(possibly_a_held_object.item_flags & (ABSTRACT|HAND_ITEM) && !possibly_a_held_object.block_chance)
-			continue
-
-		if(possibly_a_held_object in exempt_objects)
-			continue
-
-		if(possibly_a_held_object.w_class <= WEIGHT_CLASS_SMALL && !possibly_a_held_object.block_chance)
-			continue
-
-		style_factor_malus += possibly_a_held_object.block_chance
-		style_factor_malus += possibly_a_held_object.w_class * 10 * (HAS_TRAIT(possibly_a_held_object, TRAIT_WIELDED) ? 2 : 1)
-
-	if(human_carp_user.body_position != STANDING_UP) // this ain't monkey style
-		style_factor_points -= 30
-
-	style_factor_points -= style_factor_malus
-
-	return style_factor_points
-
 /// Verb added to humans who learn the art of the sleeping carp.
 /mob/living/proc/thalmann_style_help()
 	set name = "Recall Teachings"
 	set desc = "Remember the martial techniques of the German working class, twisted to fit a brutal crusade against life itself."
 	set category = "Thalmann Style Boxing"
 
-	to_chat(usr, span_info("<b><i>You retreat inward and recall the teachings of the Sleeping Carp...</i></b>\n\
+	to_chat(usr, span_info("<b><i>You stand stoically for a second, remembering your killing moves...</i></b>\n\
 	[span_notice("Gnashing Teeth")]: Punch Grab. Violently twists your opponent's arm, dislocating or even shattering bone and forcing them to drop their held items.\n\
 	[span_notice("Crashing Wave Kick")]: Punch Shove. Launch your opponent away from you with incredible force!\n\
 	[span_notice("Keelhaul")]: Shove Shove. Nonlethally kick an opponent to the floor, knocking them down, discombobulating them and dealing substantial stamina damage. If they're already prone, disarm them as well.\n\
@@ -403,7 +332,7 @@
 		return ..()
 	return FALSE
 
-/obj/item/clothing/gloves/the_sleeping_carp
+/obj/item/clothing/gloves/thalmann_style
 	name = "carp gloves"
 	desc = "These gloves are capable of making people use The Sleeping Carp."
 	icon_state = "black"
@@ -414,9 +343,9 @@
 	max_heat_protection_temperature = GLOVES_MAX_TEMP_PROTECT
 	resistance_flags = NONE
 
-/obj/item/clothing/gloves/the_sleeping_carp/Initialize(mapload)
+/obj/item/clothing/gloves/thalmann_style/Initialize(mapload)
 	. = ..()
-	AddComponent(/datum/component/martial_art_giver, /datum/martial_art/the_sleeping_carp)
+	AddComponent(/datum/component/martial_art_giver, /datum/martial_art/thalmann_style)
 
 #undef WRIST_WRENCH_COMBO
 #undef LAUNCH_KICK_COMBO
