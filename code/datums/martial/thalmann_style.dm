@@ -38,7 +38,7 @@
 	if(!iscarbon(defender))
 		var/dismembering = FALSE
 
-	var/obj/item/bodypart/affecting = defender.deprecise_zone(attacker.zone_selected)
+	var/obj/item/bodypart/affecting = defender.get_bodypart(deprecise_zone(attacker.zone_selected))
 
 	attacker.do_attack_animation(defender, ATTACK_EFFECT_PUNCH)
 	defender.visible_message(
@@ -53,11 +53,11 @@
 	log_combat(attacker, defender, "jab comboed (Thalmann Style)")
 	defender.apply_damage(20, BRUTE, affecting, wound_bonus = 30)
 
-	if (affecting != CHEST)
+	if (affecting != CHEST && dismembering)
 		if (rand(1, 20) == 1)
 			affecting.dismember(BRUTE, FALSE, WOUND_BLUNT)
 			var/turf/throw_at = get_ranged_target_turf_direct(defender, attacker, 4, 180) // Throw 180 degrees away from the explosion source
-			movable.throw_at(throw_at, 4, 2)
+			affecting.throw_at(throw_at, 4, 2)
 
 	return TRUE
 
@@ -173,7 +173,6 @@
 	if(istype(hitting_projectile, /obj/projectile/bullet/c38/match/true)) // 75% chance to ignore evasion
 		additional_adjustments -= 75
 
-	determine_avoidance = clamp(determine_avoidance + carp_style_check(carp_user) + additional_adjustments, 0, 100)
 
 	if(istype(hitting_projectile, /obj/projectile/bullet/harpoon)) // WHITE WHALE HOLY GRAIL
 		return NONE
@@ -209,28 +208,6 @@
 		span_userdanger("You take great care to remain untouched by [attacker]'s [touch_weapon]!"),
 	)
 	return COMPONENT_NO_AFTERATTACK
-
-/// If our user has committed to being as martial arty as they can be, they may be able to avoid incoming attacks.
-/datum/martial_art/thalmann_style/proc/check_dodge(mob/living/carp_user, atom/movable/hitby, damage, attack_text, attack_type, ...)
-	SIGNAL_HANDLER
-
-	var/determine_avoidance = clamp(round(carp_style_check(carp_user) / (attack_type == OVERWHELMING_ATTACK ? 2 : 1), 1), 0, 75)
-
-	if(!can_deflect(carp_user))
-		return
-
-	if(attack_type == PROJECTILE_ATTACK || attack_type == THROWN_PROJECTILE_ATTACK)
-		return NONE
-
-	if(!prob(determine_avoidance))
-		return NONE
-
-	carp_user.visible_message(
-		span_danger("[carp_user] cleanly avoids [attack_text] with incredible speed!"),
-		span_userdanger("You dodge [attack_text]"),
-	)
-	playsound(carp_user.loc, 'sound/items/weapons/punchmiss.ogg', 25, TRUE, -1)
-	return SUCCESSFUL_BLOCK
 
 /// Verb added to humans who learn the art of the sleeping carp.
 /mob/living/proc/thalmann_style_help()
