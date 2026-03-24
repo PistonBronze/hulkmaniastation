@@ -55,8 +55,8 @@
 	if (affecting != CHEST && dismembering)
 		if (rand(1, 10) == 1)
 			affecting.dismember(BRUTE, FALSE, WOUND_BLUNT, get_dir(attacker, defender), 4)
-			var/turf/throw_at = get_ranged_target_turf_direct(defender, attacker, 4, 180) // Throw 180 degrees away from the explosion source
-			affecting.throw_at(throw_at, 4, 1)
+			// var/turf/throw_at = get_ranged_target_turf_direct(defender, attacker, 4, 180) // Throw 180 degrees away from the explosion source
+			// affecting.throw_at(throw_at, 4, 1)
 
 	return TRUE
 
@@ -65,19 +65,23 @@
 
 /// Tiger Suplex: Grab Disarm, launch an enemy behind you, stunning you for a bit and the opponent for a bit longer
 /datum/martial_art/thalmann_style/proc/tiger_suplex(mob/living/attacker, mob/living/defender)
-	attacker.do_attack_animation(defender, ATTACK_EFFECT_KICK)
+	attacker.do_attack_animation(defender, ATTACK_EFFECT_DISARM)
 	defender.visible_message(
 		span_warning("[attacker] suplexes [defender] overhead!"),
 		span_userdanger("You are suplexed overhead by [attacker]!"),
-		span_hear("You hear a sickening sound of flesh hitting the ground!"),
+		span_hear("You hear the sound of a body hitting the floor!"),
 		COMBAT_MESSAGE_RANGE,
 		attacker,
 	)
-	playsound(attacker, 'sound/effects/hit_kick.ogg', 50, TRUE, -1)
-	var/atom/throw_target = get_edge_target_turf(defender, attacker.dir)
-	defender.throw_at(throw_target, 7, 4, attacker)
+	playsound(attacker, 'sound/effects/tableslam.ogg', 50, TRUE, -1)
+	attacker.Paralyze(5)
+	attacker.Knockdown(5)
+	var/atom/throw_target = get_ranged_target_turf_direct(defender, attacker, 7, 0)
+	defender.throw_at(throw_target, 2, 2, attacker, spin = FALSE)
 	defender.apply_damage(15, attacker.get_attack_type(), BODY_ZONE_CHEST, wound_bonus = CANT_WOUND)
-	log_combat(attacker, defender, "launchkicked (Sleeping Carp)")
+	defender.Paralyze(7)
+	defender.Knockdown(7)
+	log_combat(attacker, defender, "tiger suplexed (Thalmann Style)")
 	return TRUE
 
 /datum/martial_art/thalmann_style/grab_act(mob/living/attacker, mob/living/defender)
@@ -326,7 +330,5 @@
 	. = ..()
 	AddComponent(/datum/component/martial_art_giver, /datum/martial_art/thalmann_style)
 
-#undef WRIST_WRENCH_COMBO
-#undef LAUNCH_KICK_COMBO
-#undef DROP_KICK_COMBO
-#undef KNEE_STOMACH_COMBO
+#undef JAB_COMBO_COMBO
+#undef TIGER_SUPLEX_COMBO
