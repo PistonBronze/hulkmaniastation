@@ -54,7 +54,7 @@
 
 	if (affecting != CHEST && dismembering)
 		if (rand(1, 10) == 1)
-			affecting.dismember(BRUTE, FALSE, WOUND_BLUNT)
+			affecting.dismember(BRUTE, FALSE, WOUND_BLUNT, get_dir(attacker, defender), 4)
 			var/turf/throw_at = get_ranged_target_turf_direct(defender, attacker, 4, 180) // Throw 180 degrees away from the explosion source
 			affecting.throw_at(throw_at, 4, 1)
 

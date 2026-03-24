@@ -5,7 +5,7 @@
 	return TRUE
 
 ///Remove target limb from its owner, with side effects.
-/obj/item/bodypart/proc/dismember(dam_type = BRUTE, silent=TRUE, wounding_type)
+/obj/item/bodypart/proc/dismember(dam_type = BRUTE, silent=TRUE, wounding_type, launchdir = null, launchran = null)
 	if(!owner || (bodypart_flags & BODYPART_UNREMOVABLE))
 		return FALSE
 	var/mob/living/carbon/limb_owner = owner
@@ -41,9 +41,12 @@
 		return TRUE
 	if (can_bleed())
 		limb_owner.bleed(rand(20, 40))
-
 	var/direction = pick(GLOB.cardinals)
+	if (launchdir)
+		direction = launchdir
 	var/t_range = rand(2,max(throw_range/2, 2))
+	if (launchran)
+		t_range = launchran
 	var/turf/target_turf = get_turf(src)
 	for(var/i in 1 to t_range-1)
 		var/turf/new_turf = get_step(target_turf, direction)
