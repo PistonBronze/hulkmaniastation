@@ -216,7 +216,9 @@
 /obj/item/clothing/suit/jacket/infinity_jersey
 	name = "infinity jersey"
 	desc = "A red-green jersey with the number 88 on it. A strange energy seems to emmanate from it."
-	icon_state = "InfJersey"
+	icon_state = "inf_jersey"
+	allowed = list()
 	inhand_icon_state = null
 	body_parts_covered = CHEST|GROIN
+	min_cold_protection_temperature = 0
 

@@ -1,5 +1,6 @@
 #define JAB_COMBO_COMBO "HHH"
 #define TIGER_SUPLEX_COMBO "GD"
+#define EYE_COLOR_SEENOHOPE_PRIORITY "88"
 
 /datum/martial_art/thalmann_style
 	name = "Thälman Style Boxing"
@@ -14,11 +15,15 @@
 	. = ..()
 	new_holder.add_traits(thal_traits, THALMANN_STYLE_TRAIT)
 	RegisterSignal(new_holder, COMSIG_ATOM_ATTACKBY, PROC_REF(on_attackby))
+	var/datum/action/cooldown/spell/seenohope/spelladd = new()
+	spelladd.Grant(new_holder)
 
 /datum/martial_art/thalmann_style/deactivate_style(mob/living/remove_from)
 	. =  ..()
 	remove_from.remove_traits(thal_traits, THALMANN_STYLE_TRAIT)
 	UnregisterSignal(remove_from, list(COMSIG_ATOM_ATTACKBY, COMSIG_ATOM_PRE_BULLET_ACT, COMSIG_LIVING_CHECK_BLOCK))
+	var/datum/action/cooldown/spell/seenohope/spellremove = new()
+	spellremove.Remove(remove_from)
 	return .
 
 /datum/martial_art/thalmann_style/proc/check_streak(mob/living/attacker, mob/living/defender)
@@ -47,7 +52,7 @@
 		null,
 		attacker,
 	)
-	to_chat(attacker, span_danger("You do a three-punch combo on [defender]!"))
+	to_chat(attacker, span_danger("You preform a combo on [defender]!"))
 	playsound(defender, 'sound/items/weapons/punch1.ogg', 25, TRUE, -1)
 	log_combat(attacker, defender, "jab comboed (Thalmann Style)")
 	defender.apply_damage(20, BRUTE, affecting, wound_bonus = 30)
@@ -79,10 +84,61 @@
 	var/atom/throw_target = get_ranged_target_turf_direct(defender, attacker, 7, 0)
 	defender.throw_at(throw_target, 2, 2, attacker, spin = FALSE)
 	defender.apply_damage(15, attacker.get_attack_type(), BODY_ZONE_CHEST, wound_bonus = CANT_WOUND)
-	defender.Paralyze(7)
-	defender.Knockdown(7)
+	defender.Paralyze(10)
+	defender.Knockdown(15)
 	log_combat(attacker, defender, "tiger suplexed (Thalmann Style)")
 	return TRUE
+
+/datum/action/cooldown/spell/seenohope
+	name = "See No Hope"
+	desc = "Make sure everyone knows they're dead. Drains stamina of those nearby."
+	button_icon = 'icons/mob/actions/actions_items.dmi'
+	button_icon_state = "neckchop"
+	check_flags = AB_CHECK_INCAPACITATED|AB_CHECK_CONSCIOUS
+	spell_requirements = SPELL_REQUIRES_HUMAN
+
+/datum/action/cooldown/spell/seenohope/cast(atom/cast_on)
+	. = ..()
+	var/datum/status_effect/see_no_hope_pulse = New(cast_on)
+
+/datum/status_effect/see_no_hope_drain
+	id = "see_no_hope_drain"
+	duration = 10
+	status_type = STATUS_EFFECT_UNIQUE
+	processing_speed = STATUS_EFFECT_NORMAL_PROCESS
+	alert_type = /atom/movable/screen/alert/status_effect/see_no_hope_drain
+
+/datum/status_effect/see_no_hope_drain/New(atom/caster)
+	. = ..()
+
+/datum/status_effect/see_no_hope_drain/tick()
+	owner.adjust_stamina_loss(25)
+
+/atom/movable/screen/alert/status_effect/see_no_hope_drain
+	name = "See No Hope"
+	desc = "A sense of dread fill you. Is this fight even worth it?"
+	use_user_hud_icon = USER_HUD_STYLE_INHERIT
+	overlay_state = "paralysis"
+
+/datum/status_effect/see_no_hope_pulse
+	id = "see_no_hope_pulse"
+	duration = 50
+	status_type = STATUS_EFFECT_UNIQUE
+	processing_speed = STATUS_EFFECT_FAST_PROCESS
+	alert_type = null
+
+/datum/status_effect/see_no_hope_pulse/tick()
+	var/mob/living/carbon/human/human_owner = owner
+	if (ishuman(owner))
+		if (human_owner.eye_color_left_overrides[EYE_COLOR_SEENOHOPE_PRIORITY] == COLOR_RED)
+			human_owner.add_eye_color(COLOR_GREEN, EYE_COLOR_SEENOHOPE_PRIORITY)
+		else
+			human_owner.add_eye_color(COLOR_RED, EYE_COLOR_SEENOHOPE_PRIORITY)
+		for(var/mob/living/carbon/nearby_thing in range(4, owner))
+			if(nearby_thing == owner)
+				continue
+
+			var/datum/status_effect/see_no_hope_drain = New(nearby_thing)
 
 /datum/martial_art/thalmann_style/grab_act(mob/living/attacker, mob/living/defender)
 	if(!can_deflect(attacker)) //allows for deniability
@@ -138,7 +194,7 @@
 	add_to_streak("H", defender)
 	if(check_streak(attacker, defender))
 		return MARTIAL_ATTACK_SUCCESS
-
+	attacker.changeNext_move(4)
 	return MARTIAL_ATTACK_INVALID // normal punch
 
 /datum/martial_art/thalmann_style/disarm_act(mob/living/attacker, mob/living/defender)
