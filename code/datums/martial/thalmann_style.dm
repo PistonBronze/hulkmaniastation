@@ -99,7 +99,9 @@
 
 /datum/action/cooldown/spell/seenohope/cast(atom/cast_on)
 	. = ..()
-	var/datum/status_effect/see_no_hope_pulse = New(cast_on)
+	var/mob/living/carbon/human/self = cast_on
+	self.apply_status_effect(/datum/status_effect/see_no_hope_pulse)
+	self.Immobilize(50)
 
 /datum/status_effect/see_no_hope_drain
 	id = "see_no_hope_drain"
@@ -138,7 +140,7 @@
 			if(nearby_thing == owner)
 				continue
 
-			var/datum/status_effect/see_no_hope_drain = New(nearby_thing)
+			nearby_thing.apply_status_effect(/datum/status_effect/see_no_hope_drain)
 
 /datum/martial_art/thalmann_style/grab_act(mob/living/attacker, mob/living/defender)
 	if(!can_deflect(attacker)) //allows for deniability
